@@ -1,0 +1,5 @@
+com\pes\matching\CsvParser.class
+com\pes\matching\App.class
+com\pes\matching\Professor.class
+com\pes\matching\Searcher.class
+com\pes\matching\Indexer.class
