@@ -1,31 +1,19 @@
 package com.pes.matching;
 
 public class Professor {
-    private final String name;
-    private final String designation;
-    private final String research;
-    private final String teaching;
-    private final String about;
-    private final String publicationsJournals;
-    private final String publicationsConferences;
-    private final String education;
-    private final String mail;
-    private final String phone;
+    private String name, designation, research, teaching, about;
+    private String pubJournals, pubConfs, education, mail, phone;
+    private String responsibilities, image, department, campus;
 
-    // Constructor
     public Professor(String name, String designation, String research, String teaching, 
-                     String about, String publicationsJournals, String publicationsConferences, 
-                     String education, String mail, String phone) {
-        this.name = name;
-        this.designation = designation;
-        this.research = research;
-        this.teaching = teaching;
-        this.about = about;
-        this.publicationsJournals = publicationsJournals;
-        this.publicationsConferences = publicationsConferences;
-        this.education = education;
-        this.mail = mail;
-        this.phone = phone;
+                     String about, String pubJournals, String pubConfs, String education, 
+                     String mail, String phone, String responsibilities, String image, 
+                     String department, String campus) {
+        this.name = name; this.designation = designation; this.research = research;
+        this.teaching = teaching; this.about = about; this.pubJournals = pubJournals;
+        this.pubConfs = pubConfs; this.education = education; this.mail = mail;
+        this.phone = phone; this.responsibilities = responsibilities; this.image = image;
+        this.department = department; this.campus = campus;
     }
 
     // Getters
@@ -34,9 +22,13 @@ public class Professor {
     public String getResearch() { return research; }
     public String getTeaching() { return teaching; }
     public String getAbout() { return about; }
-    public String getPublicationsJournals() { return publicationsJournals; }
-    public String getPublicationsConferences() { return publicationsConferences; }
+    public String getPubJournals() { return pubJournals; }
+    public String getPubConfs() { return pubConfs; }
     public String getEducation() { return education; }
     public String getMail() { return mail; }
     public String getPhone() { return phone; }
+    public String getResponsibilities() { return responsibilities; }
+    public String getImage() { return image; }
+    public String getDepartment() { return department; }
+    public String getCampus() { return campus; }
 }
