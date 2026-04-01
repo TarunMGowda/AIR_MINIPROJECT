@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import axios from 'axios'
 import './App.css'
 
@@ -9,20 +9,25 @@ function App() {
   const [professors, setProfessors] = useState([])
   const [loading, setLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
-  
-  // NEW STATE: Keeps track of which professor card was clicked
   const [selectedProf, setSelectedProf] = useState(null)
+  
+  // NEW: State for Voice Recognition
+  const [isListening, setIsListening] = useState(false)
+  
+  // NEW: Ref for the hidden file input (Image Upload)
+  const fileInputRef = useRef(null)
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  // --- STANDARD TEXT SEARCH ---
+  const handleSearch = async (e, searchQuery = query) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim()) return;
 
     setLoading(true);
     setHasSearched(true);
-    setSelectedProf(null); // Reset detail view on new search
+    setSelectedProf(null);
     
     try {
-      const url = `http://localhost:8080/api/search?q=${query}&campus=${campus}&dept=${department}&page=1&size=15`;
+      const url = `http://localhost:8080/api/search?q=${searchQuery}&campus=${campus}&dept=${department}&page=1&size=15`;
       const response = await axios.get(url);
       setProfessors(response.data);
     } catch (error) {
@@ -33,14 +38,64 @@ function App() {
     }
   }
 
-  // --- VIEW 1: THE DETAILED PROFILE PAGE ---
+  // --- MULTI-MODAL 1: VOICE SEARCH ---
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support Voice Search. Try Google Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript); // Put the spoken words in the search bar
+      handleSearch(null, transcript); // Instantly search!
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Voice recognition error:", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  }
+
+  // --- MULTI-MODAL 2: IMAGE UPLOAD ---
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // We will build the backend for this in the next step!
+    alert(`Image "${file.name}" selected! We need to connect this to the Vision backend next.`);
+    
+    // Example format for sending an image to a Java backend later:
+    // const formData = new FormData();
+    // formData.append("image", file);
+    // await axios.post("http://localhost:8080/api/search/image", formData);
+  }
+
+  // --- VIEW 1: PROFILE PAGE ---
   if (selectedProf) {
     return (
       <div className="app-container">
         <button className="back-button" onClick={() => setSelectedProf(null)}>
           &larr; Back to Search Results
         </button>
-        
+        {/* ... (Keep your exact Profile Page JSX here from the previous step) ... */}
         <div className="profile-detail-card">
           <div className="profile-header-large">
             {selectedProf.image && selectedProf.image.length > 5 ? (
@@ -112,12 +167,12 @@ function App() {
     );
   }
 
-  // --- VIEW 2: THE MAIN SEARCH GRID (Original View) ---
+  // --- VIEW 2: MAIN SEARCH GRID ---
   return (
     <div className="app-container">
       <header className="hero-section">
         <h1>PESU Scholar Match</h1>
-        <p>Find your ideal capstone mentor based on research alignment.</p>
+        <p>Find your ideal capstone mentor using Text, Voice, or Image.</p>
         
         <form onSubmit={handleSearch} className="search-container">
           <div className="search-bar">
@@ -127,7 +182,24 @@ function App() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <button type="submit" disabled={loading}>
+            
+            {/* NEW: Multi-modal Buttons */}
+            <button type="button" className={`icon-btn ${isListening ? 'listening' : ''}`} onClick={handleVoiceSearch} title="Voice Search">
+               🎤
+            </button>
+            
+            <button type="button" className="icon-btn" onClick={() => fileInputRef.current.click()} title="Upload Image">
+               📷
+            </button>
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleImageUpload}
+            />
+
+            <button type="submit" disabled={loading} className="main-search-btn">
               {loading ? 'Searching...' : 'Search'}
             </button>
           </div>
